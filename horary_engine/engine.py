@@ -2012,6 +2012,26 @@ class EnhancedTraditionalHoraryJudgmentEngine:
                 "timing": None
             }
         
+        desc = significators.get("description", "")
+        # Fix taxonomy issue where shared significator message repeated the same house
+        if desc.startswith("Shared Significator") and significators.get("same_ruler_analysis"):
+            same_ruler_info = significators["same_ruler_analysis"]
+            houses = list(same_ruler_info.get("houses", []))
+            if len(houses) >= 2:
+                # If houses are duplicated, use the individual querent/quesited houses
+                if houses[0] == houses[1]:
+                    q_house = significators.get("querent_house")
+                    qd_house = significators.get("quesited_house")
+                    if q_house and qd_house and q_house != qd_house:
+                        houses = [q_house, qd_house]
+                shared = same_ruler_info.get("shared_ruler")
+                if shared and len(houses) >= 2:
+                    desc = (
+                        f"Shared Significator: {shared.value} rules both houses {houses[0]} and {houses[1]}"
+                    )
+                    significators["description"] = desc
+                    same_ruler_info["houses"] = houses
+
         reasoning.append(f"Significators: {significators['description']}")
         
         querent_planet = significators["querent"] 
